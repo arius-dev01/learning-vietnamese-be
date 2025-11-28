@@ -55,7 +55,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:4002", "http://localhost:4002"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:4002", "http://192.168.1.109:4002"));
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(List.of("Set-Cookie"));
         UrlBasedCorsConfigurationSource url = new UrlBasedCorsConfigurationSource();
