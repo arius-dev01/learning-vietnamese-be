@@ -13,6 +13,5 @@ public interface ILessonService {
     LessonDTO findLessonByTitle(String title);
     LessonDTO updateLesson(LessonDTO lessonDTO);
     void deleteLessonById(Long id);
-
     List<LessonDTO> getTop10LessonCompleted();
 }

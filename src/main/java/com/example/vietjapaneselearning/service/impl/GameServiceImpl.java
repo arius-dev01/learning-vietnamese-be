@@ -354,6 +354,9 @@ public class GameServiceImpl implements IGameService {
                         .lessonId(item.getLesson().getId())
                         .questionText(item.getQuestionText())
                         .explanation(item.getExplanation())
+                        .audio_url(item.isAudioUrl())
+                        .questionTextJa(item.getQuestionTextJa())
+                        .explanationJa(item.getExplanationJa())
                         .options(options)
                         .questionId(item.getId())
                         .build();

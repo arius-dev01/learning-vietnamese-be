@@ -54,7 +54,7 @@ public class User implements UserDetails {
 
     @Column(name = "last_active_date")
     private LocalDate lastActiveDate;
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.REMOVE)
     private List<PlayerGame> playerGames;
     @ManyToOne()
     @JoinColumn(name = "role_id")

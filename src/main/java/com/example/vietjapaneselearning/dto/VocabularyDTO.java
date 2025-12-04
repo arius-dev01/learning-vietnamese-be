@@ -15,4 +15,5 @@ public class VocabularyDTO {
     private String meaning;
     private String pronunciation;
     private String lesson;
+    private String meaningJa;
 }

@@ -2,7 +2,9 @@ package com.example.vietjapaneselearning.service.impl;
 
 import com.example.vietjapaneselearning.dto.UserDTO;
 import com.example.vietjapaneselearning.enums.RoleEnum;
+import com.example.vietjapaneselearning.model.Role;
 import com.example.vietjapaneselearning.model.User;
+import com.example.vietjapaneselearning.repository.RoleRepository;
 import com.example.vietjapaneselearning.repository.UserRepository;
 import com.example.vietjapaneselearning.service.IUserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,7 +27,8 @@ public class UserServiceImpl implements IUserService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private RoleRepository roleRepository;
     @Override
     public UserDTO getCurrentUser() {
         User user = currentUserService.getUserCurrent();
@@ -56,7 +60,7 @@ public class UserServiceImpl implements IUserService {
         if (!userDTO.getEmail().equals(existingUser.get().getEmail()) && userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already exist in database!");
         }
-        if (userDTO.getPassword() != null && !bCryptPasswordEncoder.matches(userDTO.getPassword(), existingUser.get().getPassword())) {
+        if (userDTO.getPassword() != null && userDTO.getPassword().isBlank()  && !userDTO.getPassword().isEmpty() && !bCryptPasswordEncoder.matches(userDTO.getPassword(), existingUser.get().getPassword())) {
             throw new IllegalArgumentException("Password does incorrect");
         }
         existingUser.get().setFullName(userDTO.getFullName());
@@ -83,6 +87,8 @@ public class UserServiceImpl implements IUserService {
                             .email(item.getEmail())
                             .phoneNumber(item.getPhoneNumber())
                             .gender(item.getGender())
+                            .bio(item.getBio())
+                            .location(item.getLocation())
                             .birthdate(String.valueOf(item.getBirthDay()))
                             .avatar(item.getAvatar())
                             .roleName(RoleEnum.valueOf(item.getRole().getName().toString()))
@@ -98,6 +104,51 @@ public class UserServiceImpl implements IUserService {
         user.setLanguage(language);
         userRepository.save(user);
     }
+
+    @Override
+    public UserDTO editUser(UserDTO userDTO) {
+        User user = userRepository.findById(userDTO.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id " + userDTO.getId()));
+        if (!user.getEmail().equals(userDTO.getEmail())) {
+            Optional<User> checkEmail = userRepository.findByEmail(userDTO.getEmail());
+            if (checkEmail.isPresent()) {
+                throw new IllegalArgumentException("Email already exist in database!");
+            }
+            user.setEmail(userDTO.getEmail());
+        }
+        if (!user.getPhoneNumber().equals(userDTO.getPhoneNumber())) {
+            Optional<User> checkPhone = userRepository.findByPhoneNumber(userDTO.getPhoneNumber());
+            if (checkPhone.isPresent()) {
+                throw new IllegalArgumentException("Phone already exist in database!");
+            }
+            user.setPhoneNumber(userDTO.getPhoneNumber());
+        }
+        Role role = roleRepository.findByName(userDTO.getRoleName());
+        if(role == null){
+            throw new IllegalArgumentException("Not found role with name " + userDTO.getRoleName());
+        }
+        user.setGender(userDTO.getGender());
+        user.setBio(userDTO.getBio());
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setRole(role);
+        user.setLocation(userDTO.getLocation());
+        user.setGender(userDTO.getGender());
+        userRepository.save(user);
+        return userDTO;
+    }
+
+    @Override
+    public int countAll() {
+        List<User> users = userRepository.findAll();
+        return users.size();
+    }
+
+    @Override
+    public int countByRole(RoleEnum role) {
+        return userRepository.countByRole(role);
+    }
+
+
 
 
 }

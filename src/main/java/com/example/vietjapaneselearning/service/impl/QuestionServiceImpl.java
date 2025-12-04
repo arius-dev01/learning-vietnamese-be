@@ -139,6 +139,12 @@ public class QuestionServiceImpl implements IQuestionService {
                 if (questionDTO.getExplanation() != null && !questionDTO.getExplanation().isBlank()) {
                     multipleChoiceQuestion.setExplanation(questionDTO.getExplanation());
                 }
+                if(questionDTO.getExplanationJa() != null && !questionDTO.getExplanationJa().isBlank()){
+                    multipleChoiceQuestion.setExplanationJa(questionDTO.getExplanationJa());
+                }
+                if(questionDTO.getQuestionTextJa() != null && !questionDTO.getQuestionTextJa().isBlank()){
+                    multipleChoiceQuestion.setQuestionTextJa(questionDTO.getQuestionTextJa());
+                }
 //                if (questionDTO.getAudio_url() != null && !questionDTO.getExplanation().isBlank()) {
 //                    multipleChoiceQuestion.setAudioUrl(questionDTO.getAudio_url());
 //                }
@@ -156,6 +162,7 @@ public class QuestionServiceImpl implements IQuestionService {
                 multipleChoiceQuestion = MultipleChoiceQuestion.builder()
                         .questionText(questionDTO.getQuestionText())
                         .explanation(questionDTO.getExplanation())
+                        .explanationJa(questionDTO.getExplanationJa())
                         .lesson(lesson)
 //                        .audioUrl(questionDTO.getAudio_url() != null && !questionDTO.getAudio_url().isBlank()
 //                                ? questionDTO.getAudio_url()
@@ -213,7 +220,7 @@ public class QuestionServiceImpl implements IQuestionService {
     public void deleteQuestion(Long questionId, Long gameId) {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(EntityNotFoundException::new);
-        if (game.getGameType().getType().equals("MC") || game.getGameType().getType().equals("LC")) {
+        if (game.getGameType().getType().equals("MC") || game.getGameType().getType().equals("LS")) {
             MultipleChoiceQuestion multipleChoiceQuestion = multipleChoiceGameQuestionRepository.findById(questionId)
                     .orElseThrow(() -> new EntityNotFoundException("Not found questionId"));
             multipleChoiceGameQuestionRepository.delete(multipleChoiceQuestion);
@@ -254,6 +261,8 @@ public class QuestionServiceImpl implements IQuestionService {
         }
         return questions;
     }
+
+
 
     private List<QuestionDTO> importExcel(MultipartFile file, QuestionType type) {
         List<QuestionDTO> questions = new ArrayList<>();
@@ -300,7 +309,34 @@ public class QuestionServiceImpl implements IQuestionService {
 
     private String getCellValue(Row row, int index) {
         Cell cell = row.getCell(index);
-        return cell != null ? cell.getStringCellValue() : null;
+        if (cell == null) return null;
+
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+
+            case NUMERIC:
+                double num = cell.getNumericCellValue();
+                if (num == (long) num) {
+                    return String.valueOf((long) num);
+                }
+                return String.valueOf(num);
+
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+
+            case FORMULA:
+                // trả về giá trị formula dưới dạng String
+                try {
+                    return cell.getStringCellValue();
+                } catch (IllegalStateException e) {
+                    return String.valueOf(cell.getNumericCellValue());
+                }
+
+            case BLANK:
+            default:
+                return "";
+        }
     }
 
     private void populateOptions(Row row, List<OptionDTO> options, int startIndex, String correctOption) {

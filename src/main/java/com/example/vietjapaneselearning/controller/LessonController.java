@@ -23,7 +23,7 @@ public class LessonController {
                                                         @RequestParam(name = "level", required = false) String level,
                                                         @RequestParam(name = "page", required = false, defaultValue = "0") int page,
                                                        @RequestParam(name = "size", required = false, defaultValue = "5") int size){
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC,"title"));
+        PageRequest pageRequest = PageRequest.of(page, 5, Sort.by(Sort.Direction.DESC,"title"));
         Map<String, Object> response = new HashMap<>();
         Page<LessonDTO> lessonDTOPage = lessonService.findAll(title, level, pageRequest);
         response.put("lesson", lessonDTOPage.getContent());

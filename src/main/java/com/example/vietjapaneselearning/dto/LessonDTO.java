@@ -24,6 +24,9 @@ public class LessonDTO {
     private String video_url;
     private String content;
     private LocalDateTime time;
+    private String describeJa;
+    private String titleJa;
+    private String contentJa;
     private List<VocabularyDTO> vocabularies;
     private Long progress;
     private Long countCompleted;

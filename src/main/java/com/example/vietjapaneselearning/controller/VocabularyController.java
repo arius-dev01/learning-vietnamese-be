@@ -2,21 +2,27 @@ package com.example.vietjapaneselearning.controller;
 
 import com.example.vietjapaneselearning.dto.VocabularyDTO;
 import com.example.vietjapaneselearning.service.IVocabularyService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/vocabulary")
+@Slf4j
 public class VocabularyController {
     @Autowired
     private IVocabularyService vocabularyService;
@@ -52,5 +58,45 @@ public class VocabularyController {
     public ResponseEntity<Void> deleteVocabulary(@PathVariable Long id) {
         vocabularyService.deleteVocabulary(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/download-file-format")
+    public ResponseEntity<byte[]> downloadFileFormat() {
+        try(Workbook workbook = new XSSFWorkbook()){
+            Sheet sheet = workbook.createSheet("File vocabulary format");
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font font = workbook.createFont();
+            font.setBold(true);
+            headerStyle.setFont(font);
+            Row header = sheet.createRow(0);
+            String[] columns = {
+                    "Vietnamese Word",
+                    "English Meaning",
+                    "Japan Meaning",
+                    "Pronunciation"
+            };
+            for(int i = 0; i < columns.length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(columns[i]);
+                cell.setCellStyle(headerStyle);
+                sheet.autoSizeColumn(i); // căn đều cột
+
+            }
+            for (int i = 0; i < columns.length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(columns[i]);
+                cell.setCellStyle(headerStyle);
+            }
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            byte[] bytes = out.toByteArray();
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=vocabulary-format.xlsx")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(bytes);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 }

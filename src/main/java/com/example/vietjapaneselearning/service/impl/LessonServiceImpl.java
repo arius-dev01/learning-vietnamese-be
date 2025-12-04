@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.example.vietjapaneselearning.model.*;
 import com.example.vietjapaneselearning.repository.*;
+import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -55,7 +57,10 @@ public class LessonServiceImpl implements ILessonService {
                     .content(lesson.getContent())
                     .created(lesson.getCreated())
                     .updated(lesson.getUpdated())
-                    .describe(lesson.getContent())
+                    .describe(lesson.getDescription())
+                    .describeJa(lesson.getDescriptionJa())
+                    .contentJa(lesson.getContentJa())
+                    .titleJa(lesson.getTitleJa())
                     .build();
         });
     }
@@ -103,11 +108,11 @@ public class LessonServiceImpl implements ILessonService {
             lessonDTO.setTitle(lesson.getTitleJa());
             lessonDTO.setContent(lesson.getContentJa());
             lessonDTO.setDescribe(lesson.getDescriptionJa());
-        }else if(language.equals("English")) {
+        } else if (language.equals("English")) {
             lessonDTO.setTitle(lesson.getTitle());
             lessonDTO.setContent(lesson.getContent());
             lessonDTO.setDescribe(lesson.getDescription());
-        }else{
+        } else {
             lessonDTO.setTitle(lesson.getTitle());
             lessonDTO.setContent(lesson.getContent());
             lessonDTO.setDescribe(lesson.getDescription());
@@ -187,16 +192,19 @@ public class LessonServiceImpl implements ILessonService {
     public LessonDTO updateLesson(LessonDTO lessonDTO) {
         Lesson lesson = lessonRepository.findById(lessonDTO.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Lesson with id " + lessonDTO.getId() + " not found!"));
-        // if(!lessonDTO.getTitle().equals(lesson.getTitle())) {
-        // Lesson existingTitleLesson =
-        // lessonRepository.findByTitle(lessonDTO.getTitle())
-        // .orElseThrow(() -> new EntityNotFoundException("Lesson with title " +
-        // lessonDTO.getTitle() + " exists!"));
-        // }
 
+        if (!lessonDTO.getTitle().equals(lesson.getTitle())) {
+           Optional<Lesson> checkTitle = lessonRepository.findByTitle(lessonDTO.getTitle());
+           if(checkTitle.isPresent()) {
+               throw new IllegalArgumentException("Lesson is already exist on database. Please choice title different!");
+           }
+        }
         lesson.setTitle(lessonDTO.getTitle());
+        lesson.setTitleJa(lessonDTO.getTitleJa());
         lesson.setDescription(lessonDTO.getDescribe());
         lesson.setContent(lessonDTO.getContent());
+        lesson.setContentJa(lessonDTO.getContentJa());
+        lesson.setDescriptionJa(lessonDTO.getDescribeJa());
         lesson.setLevel(lessonDTO.getLevel());
         lesson.setVideo_url(lessonDTO.getVideo_url());
         lesson.setUpdated(LocalDateTime.now());
@@ -205,11 +213,15 @@ public class LessonServiceImpl implements ILessonService {
     }
 
     @Override
+    @Transactional
     public void deleteLessonById(Long id) {
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Lesson with id " + id + " not found!"));
+//        vocabularyRepository.deleteByLessonId(lesson.getId());
+
         lessonRepository.delete(lesson);
     }
+
 
     @Override
     public List<LessonDTO> getTop10LessonCompleted() {

@@ -143,4 +143,9 @@ import java.util.Optional;
     public ResponseEntity<?> addUser(@RequestBody UserDTO userDTO) {
         return ResponseEntity.ok(authService.addUser(userDTO));
     }
+
+    @GetMapping("/getInfor")
+    public ResponseEntity<?> getInfor() {
+        return ResponseEntity.ok(authService.getUser());
+    }
 }

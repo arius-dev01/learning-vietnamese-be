@@ -5,9 +5,11 @@ import com.example.vietjapaneselearning.dto.request.AuthRequest;
 import com.example.vietjapaneselearning.dto.request.RegisterRequest;
 import com.example.vietjapaneselearning.dto.response.AuthResponse;
 import com.example.vietjapaneselearning.enums.RoleEnum;
+import com.example.vietjapaneselearning.model.DailyStreak;
 import com.example.vietjapaneselearning.model.Role;
 import com.example.vietjapaneselearning.model.Token;
 import com.example.vietjapaneselearning.model.User;
+import com.example.vietjapaneselearning.repository.DailyStreakRepository;
 import com.example.vietjapaneselearning.repository.RoleRepository;
 import com.example.vietjapaneselearning.repository.TokenRepository;
 import com.example.vietjapaneselearning.repository.UserRepository;
@@ -17,6 +19,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,7 +42,10 @@ public class AuthServiceImpl implements IAuthService {
     private RoleRepository roleRepository;
     @Autowired
     private TokenRepository tokenRepository;
-
+    @Autowired
+    private DailyStreakRepository  dailyStreakRepository;
+    @Autowired
+    private CurrentUserService currentUserService;
 
     @Override
     public AuthResponse login(AuthRequest request, HttpServletRequest servletRequest, HttpServletResponse response) {
@@ -128,7 +134,10 @@ public class AuthServiceImpl implements IAuthService {
         if (existingUser.isPresent()) {
             throw new IllegalArgumentException("Email is already registered");
         }
-
+        Optional<User> checkPhone = userRepository.findByPhoneNumber(userDTO.getPhoneNumber());
+        if (checkPhone.isPresent()) {
+            throw new IllegalArgumentException("Phone number is already registered");
+        }
         Role role = roleRepository.findByName(userDTO.getRoleName());
 
         User newUser = new User();
@@ -136,6 +145,7 @@ public class AuthServiceImpl implements IAuthService {
         newUser.setFullName(userDTO.getFullName());
         newUser.setEmail(userDTO.getEmail());
         newUser.setPhoneNumber(userDTO.getPhoneNumber());
+        newUser.setLanguage("English");
         newUser.setGender(userDTO.getGender());
         newUser.setPassword(passwordEncoder.encode("12345678"));
         newUser.setBirthDay(LocalDate.parse(userDTO.getBirthdate()));
@@ -159,11 +169,27 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
         Optional<User> existingUser = userRepository.findById(userId);
-        if(existingUser.isEmpty()){
-            throw new IllegalArgumentException("User not found");
+        DailyStreak dailyStreak = dailyStreakRepository.findByUser(existingUser.get());
+        if(dailyStreak != null) {
+            dailyStreakRepository.delete(dailyStreak);
         }
+
         userRepository.delete(existingUser.get());
+    }
+
+    @Override
+    public UserDTO getUser() {
+        User user = currentUserService.getUserCurrent();
+        return UserDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .avatar(user.getAvatar())
+                .language(user.getLanguage())
+                .roleName(user.getRole().getName())
+                .build();
     }
 }

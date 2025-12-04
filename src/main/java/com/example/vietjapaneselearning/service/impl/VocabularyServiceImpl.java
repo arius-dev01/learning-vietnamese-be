@@ -8,9 +8,7 @@ import com.example.vietjapaneselearning.repository.VocabularyRepository;
 import com.example.vietjapaneselearning.service.IVocabularyService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +38,7 @@ public class VocabularyServiceImpl implements IVocabularyService {
                             .id(item.getId())
                             .word(item.getWord())
                             .meaning(item.getMeaning())
+                            .meaningJa(item.getMeaningJa())
                             .pronunciation(item.getPronunciation())
                             .lesson(item.getLesson().getTitle())
                             .build();
@@ -51,6 +52,7 @@ public class VocabularyServiceImpl implements IVocabularyService {
         vocabulary.setWord(vocabularyDTO.getWord());
         vocabulary.setMeaning(vocabularyDTO.getMeaning());
         vocabulary.setPronunciation(vocabularyDTO.getPronunciation());
+        vocabulary.setMeaningJa(vocabularyDTO.getMeaningJa());
         vocabularyRepository.save(vocabulary);
         return vocabularyDTO;
     }
@@ -106,4 +108,7 @@ public class VocabularyServiceImpl implements IVocabularyService {
                 .orElseThrow(() -> new EntityNotFoundException("Lesson Not Found"));
         vocabularyRepository.delete(vocabulary);
     }
+
+
+
 }

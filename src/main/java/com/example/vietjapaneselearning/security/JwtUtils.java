@@ -30,6 +30,7 @@ public class JwtUtils {
         claims.put("fullName", user.getFullName());
         return Jwts.builder()
                 .setSubject(user.getEmail())
+
                 .claim("role", user.getRole().getName())
                 .claim("fullName", user.getFullName())
                 .setIssuedAt(new Date())

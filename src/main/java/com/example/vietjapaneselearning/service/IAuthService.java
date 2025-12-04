@@ -15,5 +15,5 @@ public interface IAuthService {
     UserDTO addUser(UserDTO userDTO);
     void updateRole(Long userId, RoleEnum roleName);
     void deleteUser(Long userId);
-
+    UserDTO getUser();
 }

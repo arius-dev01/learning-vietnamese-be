@@ -11,4 +11,7 @@ public interface IUserService {
     User editProfileUser(UserDTO userDTO);
     Page<UserDTO> getUsers(String nameOrEmail, RoleEnum role, Pageable pageable);
     void translateLanguage(String language);
+    UserDTO editUser(UserDTO userDTO);
+    int countAll();
+    int countByRole(RoleEnum role);
 }

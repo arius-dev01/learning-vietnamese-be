@@ -29,17 +29,20 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers("/api/login","/api/register", "/api/refresh_token", "/api/reset-password", "/api/forgot-password", "/api/game/*/start/*", "/api/user/me").permitAll()
+                                .requestMatchers("/api/login","/api/register", "/api/refresh_token", "/api/reset-password", "/api/forgot-password", "/api/game/*/start/*", "/api/user/me", "/api/vocabulary/download-file-format", "/api/question/download-file-format").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/user", "/api/vocabulary ","/api/game/recent-activities", "/api/lesson/top-lesson").hasAnyRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/api/game/*").permitAll()
-                                .requestMatchers(HttpMethod.DELETE, "/api/lesson/delete_lesson/*").hasAnyRole("ADMIN", "TEACHER")
+                                .requestMatchers(HttpMethod.DELETE, "/api/lesson/delete_lesson/*").hasAnyRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/api/user/delete/*").hasAnyRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/user/edit-profile/*/*").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/user/edit-user").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/user/edit-profile").hasAnyRole("USER")
 
-                                .requestMatchers(HttpMethod.PUT, "/api/lesson/update_lesson", "/api/user/edit-profile").hasAnyRole("ADMIN", "TEACHER")
-                                .requestMatchers(HttpMethod.POST, "/api/lesson/*", "/api/vocabulary/import","/api/vocabulary/add/*").hasAnyRole("ADMIN", "TEACHER")
+                                .requestMatchers(HttpMethod.PUT, "/api/user/translate-language").hasAnyRole("ADMIN", "USER")
+
+                                .requestMatchers(HttpMethod.PUT, "/api/lesson/update_lesson", "/api/user/edit-profile").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/lesson/*", "/api/vocabulary/import","/api/vocabulary/add/*").hasAnyRole("ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/api/add").hasAnyRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/api/game/*", "/api/game/*/*", "/api/game/*/topics/*/start","/api/topic/*").hasAnyRole("USER","ADMIN", "TEACHER")
+                                .requestMatchers(HttpMethod.POST, "/api/game/*", "/api/game/*/*", "/api/game/*/topics/*/start","/api/topic/*").hasAnyRole("USER","ADMIN")
                                 .requestMatchers("/api/user/*").hasAnyRole("ADMIN")
                                 .anyRequest().authenticated())
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)

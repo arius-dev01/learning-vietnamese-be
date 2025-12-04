@@ -40,7 +40,10 @@ public class UserController {
         PageRequest pageRequest = PageRequest.of(page, 5, Sort.by("id").descending());
         Page<UserDTO> dtoPage = userService.getUsers(keyword, role, pageRequest);
         response.put("users", dtoPage.getContent());
-        response.put("totalPage", dtoPage.getTotalElements());
+        response.put("totalPage", dtoPage.getTotalPages());
+        response.put("totalAdmin",userService.countByRole(RoleEnum.ADMIN));
+        response.put("total",userService.countAll());
+        response.put("totalUser",userService.countByRole(RoleEnum.USER));
         return ResponseEntity.ok(response);
     }
 
@@ -53,5 +56,8 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-
+    @PutMapping("/edit-user")
+    public ResponseEntity<UserDTO> editUser(@RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(userService.editUser(userDTO));
+    }
 }

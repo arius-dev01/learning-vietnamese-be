@@ -42,7 +42,7 @@ public class GameController {
 
     @GetMapping("")
     public ResponseEntity<Map<String, Object>> findByLessonId(@RequestParam(value = "lessonId", required = false) Long lessonId, @RequestParam(value = "page", defaultValue = "0", required = false) int page) {
-        PageRequest pageRequest = PageRequest.of(page, 10);
+        PageRequest pageRequest = PageRequest.of(page, 5);
         Page<GameDTO> dtoPage = gameService.findGameByLessonId(lessonId, pageRequest);
         Map<String, Object> map = new HashMap<>();
         map.put("games", dtoPage.getContent());
