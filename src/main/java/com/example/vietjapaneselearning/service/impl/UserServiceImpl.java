@@ -29,6 +29,7 @@ public class UserServiceImpl implements IUserService {
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
+
     @Override
     public UserDTO getCurrentUser() {
         User user = currentUserService.getUserCurrent();
@@ -60,7 +61,7 @@ public class UserServiceImpl implements IUserService {
         if (!userDTO.getEmail().equals(existingUser.get().getEmail()) && userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already exist in database!");
         }
-        if (userDTO.getPassword() != null && userDTO.getPassword().isBlank()  && !userDTO.getPassword().isEmpty() && !bCryptPasswordEncoder.matches(userDTO.getPassword(), existingUser.get().getPassword())) {
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank() && !bCryptPasswordEncoder.matches(userDTO.getPassword(), existingUser.get().getPassword())) {
             throw new IllegalArgumentException("Password does incorrect");
         }
         existingUser.get().setFullName(userDTO.getFullName());
@@ -124,10 +125,12 @@ public class UserServiceImpl implements IUserService {
             user.setPhoneNumber(userDTO.getPhoneNumber());
         }
         Role role = roleRepository.findByName(userDTO.getRoleName());
-        if(role == null){
+        if (role == null) {
             throw new IllegalArgumentException("Not found role with name " + userDTO.getRoleName());
         }
         user.setGender(userDTO.getGender());
+        user.setBirthDay(LocalDate.parse(userDTO.getBirthdate()));
+        user.setFullName(userDTO.getFullName());
         user.setBio(userDTO.getBio());
         user.setUpdatedAt(LocalDateTime.now());
         user.setRole(role);
@@ -147,8 +150,6 @@ public class UserServiceImpl implements IUserService {
     public int countByRole(RoleEnum role) {
         return userRepository.countByRole(role);
     }
-
-
 
 
 }

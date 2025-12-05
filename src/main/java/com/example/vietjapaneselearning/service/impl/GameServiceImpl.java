@@ -367,7 +367,7 @@ public class GameServiceImpl implements IGameService {
 
             return list.stream().map(item -> {
                 return QuestionDTO.builder()
-                        .gameId(gameId)
+                        .gameId(game.getId())
                         .sentence(Arrays.asList(item.getSentence().split(" ")))
                         .questionId(item.getId())
                         .lessonId(item.getLesson().getId())

@@ -148,6 +148,10 @@ public class QuestionServiceImpl implements IQuestionService {
 //                if (questionDTO.getAudio_url() != null && !questionDTO.getExplanation().isBlank()) {
 //                    multipleChoiceQuestion.setAudioUrl(questionDTO.getAudio_url());
 //                }
+
+                if(questionDTO.isAudio_url()){
+                    multipleChoiceQuestion.setAudioUrl(true);
+                }
                 if (questionDTO.getOptions() != null && !questionDTO.getOptions().isEmpty()) {
                     for (OptionDTO optionDTO : questionDTO.getOptions()) {
                         Option option = optionRepository.findById(optionDTO.getId())
@@ -162,11 +166,13 @@ public class QuestionServiceImpl implements IQuestionService {
                 multipleChoiceQuestion = MultipleChoiceQuestion.builder()
                         .questionText(questionDTO.getQuestionText())
                         .explanation(questionDTO.getExplanation())
+                        .questionTextJa(questionDTO.getQuestionTextJa())
                         .explanationJa(questionDTO.getExplanationJa())
                         .lesson(lesson)
 //                        .audioUrl(questionDTO.getAudio_url() != null && !questionDTO.getAudio_url().isBlank()
 //                                ? questionDTO.getAudio_url()
 //                                : null)
+                        .audioUrl(questionDTO.isAudio_url())
                         .game(game)
                         .build();
                 multipleChoiceQuestions.add(multipleChoiceQuestion);
@@ -224,11 +230,22 @@ public class QuestionServiceImpl implements IQuestionService {
             MultipleChoiceQuestion multipleChoiceQuestion = multipleChoiceGameQuestionRepository.findById(questionId)
                     .orElseThrow(() -> new EntityNotFoundException("Not found questionId"));
             multipleChoiceGameQuestionRepository.delete(multipleChoiceQuestion);
+
         } else {
             ArrangeSentence arrangeSentence = arrangeSentenceRepository.findById(questionId)
                     .orElseThrow(() -> new EntityNotFoundException("Not found questionId"));
             arrangeSentenceRepository.delete(arrangeSentence);
         }
+        long remainQuestions = 0;
+        if(game.getGameType().getType().equals("MC") || game.getGameType().getType().equals("LS")){
+            remainQuestions = multipleChoiceGameQuestionRepository.countByGameId(gameId);
+        }else{
+            remainQuestions = arrangeSentenceRepository.countByGameId(gameId);
+        }
+        if(remainQuestions == 0){
+            gameRepository.delete(game);
+        }
+
     }
 
     @Override
@@ -254,6 +271,7 @@ public class QuestionServiceImpl implements IQuestionService {
                 questionDTO.setSentence(Collections.singletonList(getCellValue(row, 0)));
                 questionDTO.setExplanation(getCellValue(row, 1));
                 questionDTO.setExplanationJa(getCellValue(row, 2));
+                questionDTO.setAudio_url(true);
                 questions.add(questionDTO);
             }
         } catch (Exception e) {

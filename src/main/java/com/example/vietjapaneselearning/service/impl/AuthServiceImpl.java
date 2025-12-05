@@ -145,6 +145,8 @@ public class AuthServiceImpl implements IAuthService {
         newUser.setFullName(userDTO.getFullName());
         newUser.setEmail(userDTO.getEmail());
         newUser.setPhoneNumber(userDTO.getPhoneNumber());
+        newUser.setBio(userDTO.getBio());
+        newUser.setLocation(userDTO.getLocation());
         newUser.setLanguage("English");
         newUser.setGender(userDTO.getGender());
         newUser.setPassword(passwordEncoder.encode("12345678"));

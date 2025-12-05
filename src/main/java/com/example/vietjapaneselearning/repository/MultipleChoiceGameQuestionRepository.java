@@ -17,4 +17,6 @@ public interface MultipleChoiceGameQuestionRepository extends JpaRepository<Mult
     @Query("SELECT m FROM MultipleChoiceQuestion m where m.lesson.id = :lessonId AND m.game.id = :game_id")
     List<MultipleChoiceQuestion> findByLessonIdAndGameId(@Param("lessonId") Long lessonId,
             @Param("game_id") Long game_id);
+
+    long countByGameId(Long game_id);
 }

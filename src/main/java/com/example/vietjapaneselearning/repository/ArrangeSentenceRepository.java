@@ -15,4 +15,5 @@ public interface ArrangeSentenceRepository extends JpaRepository<ArrangeSentence
     @Query("SELECT m FROM ArrangeSentence m where m.lesson.id = :lessonId AND m.game.id = :gameId")
     List<ArrangeSentence> findByLessonIdAndGameId(@Param("lessonId") Long lessonId, @Param("gameId") Long gameId);
 
+    long countByGameId(Long gameId);
 }
